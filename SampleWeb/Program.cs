@@ -1,4 +1,3 @@
-using RedirectManager;
 namespace SampleWeb;
 
 public class Program
