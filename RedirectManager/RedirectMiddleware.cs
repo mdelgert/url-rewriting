@@ -17,39 +17,32 @@ public class RedirectMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        // Note caching is implemented if change logic in code will need to wait until path expires.
-        // Check if the request path should be redirected
+        // Note caching is implemented, check if the request path should be redirected.
         var requestPath = context.Request.Path;
-        var pathSegments = requestPath.Value.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
-        var productPath = "/" + pathSegments[pathSegments.Length - 1];
-        var redirectPath = requestPath.Value.Replace(productPath, "");
-
-        var redirectData = RedirectService.GetRedirectData()
-            .FirstOrDefault(r => redirectPath.Equals(r.RedirectUrl, StringComparison.OrdinalIgnoreCase));
-
-        if (redirectData != null)
+        if (requestPath.Value != null)
         {
-            var targetUrl = redirectData.UseRelative
-                ? new PathString(requestPath.Value.Replace(redirectData.RedirectUrl, redirectData.TargetUrl))
-                : new PathString(redirectData.TargetUrl + productPath);
+            var pathSegments = requestPath.Value.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries);
+            var productPath = "/" + pathSegments[^1];
+            var redirectPath = requestPath.Value.Replace(productPath, "");
 
-            // Returns a redirect response (HTTP 301 or HTTP 302) to the client.
-            if (redirectData.RedirectType == 301)
+            var redirectData = RedirectService.GetRedirectData()
+                .FirstOrDefault(r => redirectPath.Equals(r.RedirectUrl, StringComparison.OrdinalIgnoreCase));
+
+            if (redirectData != null)
             {
-                context.Response.Redirect(targetUrl, true);
+                var targetUrl = redirectData.UseRelative
+                    ? new PathString(requestPath.Value.Replace(redirectData.RedirectUrl, redirectData.TargetUrl))
+                    : new PathString(redirectData.TargetUrl + productPath);
+
+                // Returns a redirect response (HTTP 301 or HTTP 302) to the client.
+                context.Response.Redirect(targetUrl, redirectData.RedirectType == 301);
+
+                _logger.LogInformation($"Redirected {requestPath} to {targetUrl} ({redirectData.RedirectType}).");
+
+                return;
             }
-            else
-            {
-                context.Response.Redirect(targetUrl, false);
-            }
-            
-            _logger.LogInformation($"Redirected {requestPath} to {targetUrl} ({redirectData.RedirectType}).");
-            
-            return;
         }
 
         await _next(context);
     }
-
-
 }
