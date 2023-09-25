@@ -9,12 +9,12 @@ namespace RedirectManager;
 
 public class Startup
 {
-    public IConfiguration Configuration { get; }
-
     public Startup(IConfiguration configuration)
     {
         Configuration = configuration;
     }
+
+    private IConfiguration Configuration { get; }
 
     public void ConfigureServices(IServiceCollection services)
     {
@@ -26,13 +26,12 @@ public class Startup
 
         // Add configuration to the DI container
         services.AddSingleton(Configuration);
-
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         // Configure cache duration from app settings, if no value defaults to 5 minutes
-        var cacheDuration = TimeSpan.FromMinutes(Configuration.GetValue<int>("RedirectCacheDuration", 5));
+        var cacheDuration = TimeSpan.FromMinutes(Configuration.GetValue("RedirectCacheDuration", 5));
 
         app.UseMiddleware<RedirectMiddleware>();
         app.UseResponseCaching();
@@ -45,10 +44,9 @@ public class Startup
                 MaxAge = cacheDuration,
                 Public = true
             };
-            context.Response.Headers[HeaderNames.Vary] = new[] { "Accept-Encoding" };
+            context.Response.Headers[HeaderNames.Vary] = new[] {"Accept-Encoding"};
 
             await next();
         });
     }
 }
-

@@ -2,26 +2,26 @@
 
 public class RedirectService
 {
-    public List<RedirectData> GetRedirectData()
+    public static IEnumerable<RedirectData> GetRedirectData()
     {
         // Mock data; replace this with actual API calls
         return new List<RedirectData>
         {
-            new RedirectData
+            new()
             {
                 RedirectUrl = "/campaignA",
                 TargetUrl = "/campaigns/targetcampaign",
                 RedirectType = 302,
                 UseRelative = false
             },
-            new RedirectData
+            new()
             {
                 RedirectUrl = "/campaignB",
                 TargetUrl = "/campaigns/targetcampaign/channelB",
                 RedirectType = 302,
                 UseRelative = false
             },
-            new RedirectData
+            new()
             {
                 RedirectUrl = "/product-directory",
                 TargetUrl = "/products",
@@ -31,4 +31,3 @@ public class RedirectService
         };
     }
 }
-

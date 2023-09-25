@@ -5,15 +5,13 @@ namespace RedirectManager;
 
 public class RedirectMiddleware
 {
-    private readonly RequestDelegate _next;
-    private readonly RedirectService _redirectService;
     private readonly ILogger<RedirectMiddleware> _logger;
+    private readonly RequestDelegate _next;
 
     // Constructor
-    public RedirectMiddleware(RequestDelegate next, RedirectService redirectService, ILogger<RedirectMiddleware> logger)
+    public RedirectMiddleware(RequestDelegate next, ILogger<RedirectMiddleware> logger)
     {
         _next = next;
-        _redirectService = redirectService;
         _logger = logger;
     }
 
@@ -21,7 +19,7 @@ public class RedirectMiddleware
     {
         // Check if the request path should be redirected
         var path = context.Request.Path;
-        var redirectData = _redirectService.GetRedirectData()
+        var redirectData = RedirectService.GetRedirectData()
             .FirstOrDefault(r => path.Equals(r.RedirectUrl, StringComparison.OrdinalIgnoreCase));
 
         if (redirectData != null)
