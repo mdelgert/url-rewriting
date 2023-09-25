@@ -1,4 +1,4 @@
-﻿namespace SampleWeb;
+﻿namespace RedirectManager;
 
 public class RedirectService
 {
@@ -31,3 +31,4 @@ public class RedirectService
         };
     }
 }
+

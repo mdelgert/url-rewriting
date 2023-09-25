@@ -1,4 +1,4 @@
-﻿namespace SampleWeb;
+﻿namespace RedirectManager;
 
 public class RedirectData
 {

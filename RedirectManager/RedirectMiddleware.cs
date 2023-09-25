@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
-namespace SampleWeb;
+namespace RedirectManager;
 
 public class RedirectMiddleware
 {
@@ -37,4 +38,3 @@ public class RedirectMiddleware
         await _next(context);
     }
 }
-
