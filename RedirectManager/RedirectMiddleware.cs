@@ -17,22 +17,39 @@ public class RedirectMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
+        // Note caching is implemented if change logic in code will need to wait until path expires.
         // Check if the request path should be redirected
-        var path = context.Request.Path;
+        var requestPath = context.Request.Path;
+        var pathSegments = requestPath.Value.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+        var productPath = "/" + pathSegments[pathSegments.Length - 1];
+        var redirectPath = requestPath.Value.Replace(productPath, "");
+
         var redirectData = RedirectService.GetRedirectData()
-            .FirstOrDefault(r => path.Equals(r.RedirectUrl, StringComparison.OrdinalIgnoreCase));
+            .FirstOrDefault(r => redirectPath.Equals(r.RedirectUrl, StringComparison.OrdinalIgnoreCase));
 
         if (redirectData != null)
         {
             var targetUrl = redirectData.UseRelative
-                ? new PathString(path.Value.Replace(redirectData.RedirectUrl, redirectData.TargetUrl))
-                : new PathString(redirectData.TargetUrl);
+                ? new PathString(requestPath.Value.Replace(redirectData.RedirectUrl, redirectData.TargetUrl))
+                : new PathString(redirectData.TargetUrl + productPath);
 
-            context.Response.Redirect(targetUrl, redirectData.UseRelative);
-            _logger.LogInformation($"Redirected {path} to {targetUrl} ({redirectData.RedirectType}).");
+            // Returns a redirect response (HTTP 301 or HTTP 302) to the client.
+            if (redirectData.RedirectType == 301)
+            {
+                context.Response.Redirect(targetUrl, true);
+            }
+            else
+            {
+                context.Response.Redirect(targetUrl, false);
+            }
+            
+            _logger.LogInformation($"Redirected {requestPath} to {targetUrl} ({redirectData.RedirectType}).");
+            
             return;
         }
 
         await _next(context);
     }
+
+
 }

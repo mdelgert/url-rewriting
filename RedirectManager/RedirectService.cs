@@ -27,6 +27,13 @@ public class RedirectService
                 TargetUrl = "/products",
                 RedirectType = 301,
                 UseRelative = true
+            },
+            new()
+            {
+                RedirectUrl = "/en-us/products",
+                TargetUrl = "/products",
+                RedirectType = 301,
+                UseRelative = true
             }
         };
     }
