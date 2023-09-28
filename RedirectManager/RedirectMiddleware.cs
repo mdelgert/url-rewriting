@@ -22,24 +22,28 @@ public class RedirectMiddleware
         if (requestPath.Value != null)
         {
             var pathSegments = requestPath.Value.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries);
-            var productPath = "/" + pathSegments[^1];
-            var redirectPath = requestPath.Value.Replace(productPath, "");
 
-            var redirectData = RedirectService.GetRedirectData()
-                .FirstOrDefault(r => redirectPath.Equals(r.RedirectUrl, StringComparison.OrdinalIgnoreCase));
-
-            if (redirectData != null)
+            if(pathSegments.Length > 0)
             {
-                var targetUrl = redirectData.UseRelative
-                    ? new PathString(requestPath.Value.Replace(redirectData.RedirectUrl, redirectData.TargetUrl))
-                    : new PathString(redirectData.TargetUrl + productPath);
+                var productPath = "/" + pathSegments[^1];
+                var redirectPath = requestPath.Value.Replace(productPath, "");
 
-                // Returns a redirect response (HTTP 301 or HTTP 302) to the client.
-                context.Response.Redirect(targetUrl, redirectData.RedirectType == 301);
+                var redirectData = RedirectService.GetRedirectData()
+                    .FirstOrDefault(r => redirectPath.Equals(r.RedirectUrl, StringComparison.OrdinalIgnoreCase));
 
-                _logger.LogInformation($"Redirected {requestPath} to {targetUrl} ({redirectData.RedirectType}).");
+                if (redirectData != null)
+                {
+                    var targetUrl = redirectData.UseRelative
+                        ? new PathString(requestPath.Value.Replace(redirectData.RedirectUrl, redirectData.TargetUrl))
+                        : new PathString(redirectData.TargetUrl + productPath);
 
-                return;
+                    // Returns a redirect response (HTTP 301 or HTTP 302) to the client.
+                    context.Response.Redirect(targetUrl, redirectData.RedirectType == 301);
+
+                    _logger.LogInformation($"Redirected {requestPath} to {targetUrl} ({redirectData.RedirectType}).");
+
+                    return;
+                }
             }
         }
 
